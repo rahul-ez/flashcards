@@ -1,0 +1,61 @@
+What is the general term for a complete set of symbolic names and rules for their use that constitute a programming language?,Assembly language.
+What is the name of the program that automatically translates an assembly language program into machine instructions?,An assembler.
+"In assembly language, the user program in its original alphanumeric text format is called a _____.",source program
+"After an assembler processes a source program, the resulting machine language program is called an _____.",object program
+What are statements in assembly language called that are used by the assembler during translation but do not translate into machine instructions?,Assembler directives (or commands).
+"Which assembler directive is used to name constant values, similar to `#define` in C?",EQU.
+What is the purpose of the `ORIGIN` (or `ORG`) assembler directive?,It tells the assembler where in memory to place the instructions that follow.
+Which assembler directive is used to reserve a specified number of bytes of space in memory?,RESERVE.
+What is the function of the `DATAWORD` assembler directive?,It is used to declare a variable of one word size and initialize it with a specific value.
+"In the instruction `MOVE N,R1`, what type of addressing mode is used for the operand `N`?","Absolute (Direct) addressing, where N is a memory location."
+"In the instruction `MOVE #NUM1,R2`, what does the '#' symbol indicate about the operand `NUM1`?","It indicates immediate addressing, meaning the address of NUM1 is being loaded into R2."
+"What does the instruction `ADD (R2),R0` typically do in assembly language?",It adds the contents of the memory location whose address is stored in register R2 to the contents of register R0.
+"In the context of program-controlled I/O, what is the purpose of the `DATAIN` buffer register?",It is an 8-bit buffer register associated with the keyboard that holds a character entered by the user.
+"The keyboard status flag, `SIN`, is set to 1 to indicate what state?",A key has been pressed and a character is present in the `DATAIN` buffer.
+What is the function of the `DATAOUT` buffer register in I/O operations?,"It is a buffer register for an output device like a printer or display, holding the character to be sent."
+"The display/printer status flag, `SOUT`, is set to 1 to indicate what state?",The display or printer is ready to receive a character.
+What principle does a stack data structure operate on?,"LIFO (Last-In, First-Out)."
+What is the name of the special register that points to the top of the stack?,Stack Pointer (SP).
+"In many computer architectures, a stack grows in the direction of _____ memory addresses.",decreasing
+"When pushing a 4-byte word onto a stack that grows toward lower addresses, the stack pointer (SP) is _____ by 4.",decremented
+"When popping a 4-byte word from a stack that grows toward lower addresses, the stack pointer (SP) is _____ by 4.",incremented
+"What addressing mode is represented by `-(SP)` in an instruction like `Move NEWITEM, -(SP)`?",Autodecrement addressing.
+"What addressing mode is represented by `(SP)+` in an instruction like `Move (SP)+, ITEM`?",Autoincrement addressing.
+What principle does a queue data structure operate on?,"FIFO (First-In, First-Out)."
+"Unlike a stack, a queue requires two pointers to keep track of its ends. What do these pointers track?",The front and the back of the queue.
+"What technique is used to limit a queue to a fixed region in memory, allowing it to wrap around from the end to the beginning?",A circular buffer.
+"In the context of subroutines, what is the `CALL` instruction used for?",To transfer program control to the first instruction of a subroutine.
+What is the name for the mechanism by which a computer calls and returns from a subroutine?,Subroutine linkage method.
+"In the simplest subroutine linkage method, what specific register is used to save the return address?",The LINK register.
+"When a `CALL` instruction is executed, the contents of the Program Counter (PC) are stored in the _____.",Link Register
+What programming practice involves one subroutine calling another subroutine?,Subroutine nesting.
+Why is it essential to save the contents of the link register before a nested subroutine call?,"Because the second call will overwrite the link register, losing the return address of the first subroutine."
+Return addresses from nested subroutines are generated and used in what order?,"Last-in, first-out (LIFO)."
+What data structure is ideal for managing return addresses in subroutine nesting?,The processor stack.
+What is the general term for the exchange of information between a calling program and a subroutine?,Parameter passing.
+"When a subroutine is passed the address of a variable rather than its actual value, this is known as passing by _____.",reference
+"When a subroutine is passed the actual data (e.g., the number of entries in a list), this is known as passing by _____.",value
+What is the term for the private workspace on the stack created when a subroutine is entered and freed when it returns?,A stack frame.
+"In a typical stack frame, what register is set to point to a fixed location within the frame to provide a stable reference point for parameters and local variables?",The Frame Pointer (FP).
+"Typically, the first two instructions in a subroutine that uses a stack frame are `Move FP, -(SP)` and `Move SP, FP`. What is the purpose of this sequence?",To save the old frame pointer on the stack and then establish the new frame pointer for the current subroutine.
+"In the basic performance equation $T = \frac{N \times S}{R}$, what does the variable 'T' represent?",The total processor time required to execute a program.
+"In the basic performance equation $T = \frac{N \times S}{R}$, what does the variable 'N' represent?",The actual number of instructions executed in a program.
+"In the basic performance equation $T = \frac{N \times S}{R}$, what does the variable 'S' represent?",The average number of basic steps (clock cycles) needed to execute one instruction.
+"In the basic performance equation $T = \frac{N \times S}{R}$, what does the variable 'R' represent?",The clock rate of the processor (in cycles per second).
+Represent the 32-bit integer `20406080H` in Little-endian byte order.,"`80h`, `60h`, `40h`, `20h`."
+"Represent the 32-bit integer `12345678h` in Big-endian byte order, starting at address 0.","Address 0: `12`, Address 1: `34`, Address 2: `56`, Address 3: `78`."
+What will be the state of the Zero (Z) flag after adding `0FH` and `F0H`?,"Z=0, because the result (`FFH`) is not zero."
+What will be the state of the Sign/Negative (N) flag after adding `0FH` and `F0H`?,"N=1, because the most significant bit of the result (`1111 1111`) is 1."
+"What is the effective address (EA) for the instruction `STORE R3, 50(R1,R2)` if R1=3500 and R2=2800?",EA = 50 + [R1] + [R2] = 50 + 3500 + 2800 = 6350.
+"What is the effective address (EA) for the memory operand in the instruction `ADD -(R1),R5`, assuming R1=3500 and a 32-bit word length?",EA = [R1] - 4 = 3500 - 4 = 3496. (The address is calculated before the memory access).
+A processor has 40 distinct instructions and 24 general-purpose registers. What is the minimum number of bits required for the opcode field?,"6 bits, because $2^5=32$ (too small) and $2^6=64$ (sufficient)."
+A processor has 24 general-purpose registers. How many bits are required to specify one register operand?,"5 bits, because $2^4=16$ (too small) and $2^5=32$ (sufficient)."
+What is the addressing function for the `Immediate` addressing mode?,The Operand is the Value given in the instruction.
+"What is the addressing function for the `Register` addressing mode (e.g., `MOV R1,R0`)?","EA = Ri (The effective address is the register itself, so the operand is in the register)."
+"What is the addressing function for the `Absolute (Direct)` addressing mode (e.g., `MOV SUM,R2`)?",EA = LOC (The effective address is the memory location specified).
+"What is the addressing function for the `Indirect` addressing mode (e.g., `ADD (R2),R0`)?",EA = [Ri] (The effective address is the value stored in the register).
+"What is the addressing function for the `Index` addressing mode (e.g., `MOV 4(R2),R0`)?",EA = [Ri] + X (The effective address is the sum of the contents of the index register and a constant offset X).
+"What is the addressing function for the `Base with index` addressing mode (e.g., `ADD (R0,R1),R2`)?",EA = [Ri] + [Rj] (The effective address is the sum of the contents of two registers).
+"What is the addressing function for the `Relative` addressing mode (e.g., `BNE LOOP`)?",EA = [PC] + X (The effective address is the sum of the program counter's contents and a constant offset).
+"In `Autoincrement` addressing mode, such as `ADD (R2)+, R0`, when is the register incremented?",After its contents are used as the effective address.
+"In `Autodecrement` addressing mode, such as `ADD -(R2), R0`, when is the register decremented?",Before its contents are used as the effective address.

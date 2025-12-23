@@ -1,0 +1,468 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>CSV Flashcards</title>
+    <style>
+        :root {
+            --bg: #0f1113;
+            --card: #272727;
+            --muted: #a9b0b6;
+            --accent: #5b9cff;
+            --accent-2: #2ecc71;
+        }
+
+        * { box-sizing: border-box; }
+
+        body {
+            font-family: 'Segoe UI', Roboto, Arial, sans-serif;
+            background: radial-gradient(800px 400px at 25% 50%, rgba(91,156,255,0.08), transparent 10%),
+                        radial-gradient(700px 350px at 75% 50%, rgba(46,204,113,0.08), transparent 10%),
+                        linear-gradient(180deg, #0b0c0e, #0f1113);
+            color: #e6e9ee;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            margin: 0;
+            padding: 40px 20px;
+        }
+
+        h2 {
+            position: absolute;
+            top: 24px;
+            left: 24px;
+            color: #c6ced6;
+            font-weight: 400;
+            letter-spacing: 0.4px;
+        }
+
+        .container {
+            position: relative;
+            width: 720px;
+            max-width: calc(100% - 40px);
+            display:flex;
+            align-items:center;
+            justify-content:center;
+            flex-direction:column;
+        }
+
+        .glow {
+            position: absolute;
+            width: 420px;
+            height: 420px;
+            border-radius: 50%;
+            filter: blur(60px);
+            opacity: 0.55;
+            pointer-events: none;
+        }
+        .glow.left { left: -180px; top: 50px; background: radial-gradient(circle at center, rgba(91,156,255,0.3), transparent 40%); }
+        .glow.right { right: -180px; top: 50px; background: radial-gradient(circle at center, rgba(46,204,113,0.28), transparent 40%); }
+
+        .card-scene {
+            position: relative;
+            perspective: 1200px;
+            width: 480px;
+            height: 320px;
+            display:flex;
+            align-items:center;
+            justify-content:center;
+        }
+
+        .card {
+            width: 420px;
+            height: 280px;
+            border-radius: 24px;
+            box-shadow:
+                0 30px 40px rgba(0,0,0,0.5),
+                inset 0 -8px 18px rgba(0,0,0,0.4);
+            transform-style: preserve-3d;
+            transition: transform 700ms cubic-bezier(.22,.9,.31,1);
+            will-change: transform;
+            position: relative;
+            background: linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01));
+            overflow: visible;
+        }
+
+        .card-inner {
+            width:100%;
+            height:100%;
+            position:relative;
+            transform-style: preserve-3d;
+            transition: transform 700ms cubic-bezier(.22,.9,.31,1);
+        }
+
+        .card.flipped .card-inner { transform: rotateY(180deg); }
+
+        .card-face {
+            position:absolute;
+            inset:0;
+            display:flex;
+            align-items:center;
+            justify-content:center;
+            padding:30px;
+            backface-visibility:hidden;
+            -webkit-backface-visibility:hidden;
+            border-radius:24px;
+            color: #eef2f5;
+            font-size:22px;
+            line-height:1.35;
+            text-align:left;
+            overflow:hidden;
+            word-break:break-word;
+            white-space:normal;
+        }
+
+        .card-text {
+            width:100%;
+            overflow:hidden;
+            display:block;
+            word-break:break-word;
+            line-height:1.35;
+            font-size:22px;
+        }
+
+        .card-text code {
+            background: rgba(255,255,255,0.03);
+            padding: 2px 6px;
+            border-radius: 6px;
+            font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, "Roboto Mono", "Segoe UI Mono", monospace;
+            font-size: 0.92em;
+            color: #bfe1ff;
+        }
+
+        .card-text sup {
+            font-size: 0.72em;
+            vertical-align: super;
+            color: #e6eefc;
+        }
+
+        /* inline fraction styling for simple LaTeX \frac{a}{b} */
+        .card-text .frac {
+            display:inline-block;
+            vertical-align: middle;
+            text-align:center;
+            margin:0 6px;
+            font-size:0.9em;
+            line-height:1;
+        }
+        .card-text .frac .num { display:block; padding:0 6px; }
+        .card-text .frac .den { display:block; border-top:1px solid rgba(255,255,255,0.08); padding:2px 6px; margin-top:3px; }
+
+        .card-front {
+            background: linear-gradient(180deg, rgba(255,255,255,0.02), rgba(0,0,0,0.06));
+        }
+
+        .card-back {
+            transform: rotateY(180deg);
+            background: linear-gradient(180deg, rgba(0,0,0,0.06), rgba(255,255,255,0.01));
+            color: #f1f6f6;
+            font-style:italic;
+        }
+
+        /* navigation buttons */
+        .nav {
+            position:absolute;
+            top:50%;
+            transform:translateY(-50%);
+            width:48px;
+            height:48px;
+            border-radius:50%;
+            border:none;
+            display:flex;
+            align-items:center;
+            justify-content:center;
+            background:rgba(0,0,0,0.35);
+            color: #9fc9ff;
+            font-size:20px;
+            cursor:pointer;
+            box-shadow: 0 6px 18px rgba(0,0,0,0.45);
+            backdrop-filter: blur(6px);
+            transition: transform 180ms, background 180ms;
+        }
+        .nav.prev { left:-70px; }
+        .nav.next { right:-70px; }
+        .nav:hover { transform:translateY(-50%) scale(1.06); background:rgba(0,0,0,0.45); }
+
+        .controls { margin-top:18px; display:flex; gap:10px; align-items:center; }
+        button { padding:10px 14px; border-radius:8px; border:none; background:#1b1d1f; color:#dbe7ff; cursor:pointer; }
+        #openFile { background: linear-gradient(90deg,var(--accent), #3b8cff); box-shadow: 0 6px 14px rgba(59,140,255,0.12); }
+
+        .progress { margin-top:12px; color:var(--muted); font-size:14px; }
+
+        /* slide animations */
+        .slide-left { animation: slideLeft 360ms ease; }
+        .slide-right { animation: slideRight 360ms ease; }
+        @keyframes slideLeft { 0%{ transform: translateX(80px) scale(0.98); opacity:0 } 100%{ transform:none; opacity:1 } }
+        @keyframes slideRight { 0%{ transform: translateX(-80px) scale(0.98); opacity:0 } 100%{ transform:none; opacity:1 } }
+
+        /* small responsive */
+        @media (max-width:600px) {
+            .card-scene { width: 92%; height: 240px; }
+            .nav.prev { left: -56px; }
+            .nav.next { right: -56px; }
+            .card { width:100%; height:220px; border-radius:18px; }
+        }
+    </style>
+</head>
+<body>
+
+    <h2>Flashcards</h2>
+
+    <input type="file" id="csvFile" accept=".csv" style="display:none">
+    <div class="container">
+      <div class="glow left"></div>
+      <div class="glow right"></div>
+
+      <div class="card-scene" id="cardScene" tabindex="0">
+        <div class="card" id="card">
+          <div class="card-inner" id="cardInner">
+            <div class="card-face card-front" id="cardFront"><div class="card-text" id="cardFrontText">Load a CSV file to start</div></div>
+            <div class="card-face card-back" id="cardBack"><div class="card-text" id="cardBackText">Press Space to flip</div></div>
+          </div>
+        </div>
+        <button class="nav prev" aria-label="Previous" onclick="prevCard()">←</button>
+        <button class="nav next" aria-label="Next" onclick="nextCard()">→</button>
+      </div>
+
+      <div class="controls">
+        <button id="openFile">Open CSV</button>
+      </div>
+      <div class="progress" id="progress">0 / 0</div>
+    </div>
+
+    <script>
+        let flashcards = [];
+        let index = 0;
+        let showingFront = true;
+
+        const fileInput = document.getElementById('csvFile');
+        const openBtn = document.getElementById('openFile');
+        const card = document.getElementById('card');
+        const cardInner = document.getElementById('cardInner');
+        const cardFront = document.getElementById('cardFront');
+        const cardBack = document.getElementById('cardBack');
+        const cardFrontText = document.getElementById('cardFrontText');
+        const cardBackText = document.getElementById('cardBackText');
+        const cardScene = document.getElementById('cardScene');
+        const progressEl = document.getElementById('progress');
+
+        openBtn.addEventListener('click', () => fileInput.click());
+
+        // simple CSV line parser that respects quoted fields and double-quote escapes
+        function parseCSVLine(line) {
+            const fields = [];
+            let cur = '';
+            let inQuotes = false;
+            for (let i = 0; i < line.length; i++) {
+                const ch = line[i];
+                if (ch === '"') {
+                    // handle escaped double quotes ""
+                    if (inQuotes && line[i + 1] === '"') { cur += '"'; i++; }
+                    else { inQuotes = !inQuotes; }
+                } else if (ch === ',' && !inQuotes) {
+                    fields.push(cur);
+                    cur = '';
+                } else {
+                    cur += ch;
+                }
+            }
+            fields.push(cur);
+            return fields;
+        }
+
+        fileInput.addEventListener('change', function (e) {
+            const file = e.target.files[0];
+            if (!file) return;
+            const reader = new FileReader();
+
+            reader.onload = function () {
+                const lines = reader.result.split(/\r?\n/).filter(Boolean);
+                flashcards = [];
+
+                for (let i = 0; i < lines.length; i++) {
+                    const row = parseCSVLine(lines[i]);
+                    if (row.length >= 2) {
+                        flashcards.push({
+                            front: row[0].trim().replace(/^"(.*)"$/, '$1'),
+                            back: row.slice(1).join(',').trim().replace(/^"(.*)"$/, '$1')
+                        });
+                    }
+                }
+
+                index = 0;
+                showingFront = true;
+                card.classList.remove('flipped');
+                showCard(true);
+                updateProgress();
+            };
+
+            reader.readAsText(file);
+        });
+
+        function fitText(el, opts = {}) {
+            const max = opts.max || 28;
+            const min = opts.min || 14;
+            // start from a reasonable base (CSS size) or max
+            let size = Math.min(max, Math.max(min, parseInt(getComputedStyle(el).fontSize) || 22));
+            el.style.fontSize = size + 'px';
+
+            // reduce font size until it fits inside the parent's height/width
+            const parent = el.parentElement;
+            while (size > min && (el.scrollHeight > parent.clientHeight - 6 || el.scrollWidth > parent.clientWidth - 6)) {
+                size -= 1;
+                el.style.fontSize = size + 'px';
+            }
+        }
+
+        // helpers for safe formatting (escape -> inject minimal HTML for code/superscripts)
+        function escapeHTML(str) {
+            return str
+                .replace(/&/g, '&amp;')
+                .replace(/</g, '&lt;')
+                .replace(/>/g, '&gt;')
+                .replace(/"/g, '&quot;');
+        }
+
+        function renderInlineMath(expr) {
+            // convert ^{...} and ^x to <sup>...</sup>
+            let s = expr.replace(/\^\{([^}]+)\}/g, '<sup>$1</sup>');
+            s = s.replace(/\^([A-Za-z0-9]+)/g, '<sup>$1</sup>');
+            return s;
+        }
+
+        function formatCardText(raw) {
+            if (!raw) return '';
+            // trim and remove surrounding quotes if present
+            let s = raw.trim().replace(/^\"(.*)\"$/, '$1');
+
+            // escape HTML to prevent injection
+            s = escapeHTML(s);
+
+            // replace LaTeX-like commands: \times -> ×
+            s = s.replace(/\\times/g, '×');
+
+            // convert simple LaTeX fractions \frac{num}{den} into inline HTML
+            s = s.replace(/\\frac\s*\{([^}]+)\}\s*\{([^}]+)\}/g, function (_, num, den) {
+                // num and den are already HTML-escaped by escapeHTML
+                // allow basic superscripts inside numerator/denominator
+                num = renderInlineMath(num);
+                den = renderInlineMath(den);
+                return '<span class="frac"><span class="num">' + num + '</span><span class="den">' + den + '</span></span>';
+            });
+
+            // render inline code `x`
+            s = s.replace(/`([^`]+)`/g, function (_, inner) {
+                return '<code>' + inner.replace(/</g, '&lt;') + '</code>';
+            });
+
+            // render simple inline math delimited by $...$
+            // do not escape '<' here so that earlier HTML (e.g., \frac replacement) remains intact
+            s = s.replace(/\$(.+?)\$/g, function (_, expr) {
+                return renderInlineMath(expr);
+            });
+
+            // convert explicit newlines to <br>
+            s = s.replace(/\n/g, '<br>');
+            // collapse multiple spaces
+            s = s.replace(/ {2,}/g, ' ');
+            return s;
+        }
+
+        // refit on resize to handle viewport changes
+        let resizeTimer = null;
+        window.addEventListener('resize', () => {
+            clearTimeout(resizeTimer);
+            resizeTimer = setTimeout(() => {
+                fitText(cardFrontText);
+                fitText(cardBackText);
+            }, 120);
+        });
+
+        function showCard(skipAnim = false) {
+            if (flashcards.length === 0) {
+                cardFrontText.innerHTML = formatCardText('Load a CSV file to start');
+                cardBackText.innerHTML = formatCardText('Press Space to flip');
+                progressEl.textContent = '0 / 0';
+                fitText(cardFrontText);
+                fitText(cardBackText);
+                return;
+            }
+
+            cardFrontText.innerHTML = formatCardText(flashcards[index].front);
+            cardBackText.innerHTML = formatCardText(flashcards[index].back);
+            progressEl.textContent = (index + 1) + ' / ' + flashcards.length;
+
+            // clear any inline sizes so fitText can try larger sizes first
+            cardFrontText.style.fontSize = '';
+            cardBackText.style.fontSize = '';
+
+            // ensure text fits the card area
+            fitText(cardFrontText);
+            fitText(cardBackText);
+
+            if (showingFront) {
+                card.classList.remove('flipped');
+            } else {
+                card.classList.add('flipped');
+            }
+
+            if (!skipAnim) {
+                cardScene.classList.remove('slide-left','slide-right');
+                void cardScene.offsetWidth;
+            }
+        }
+
+        function updateProgress() {
+            progressEl.textContent = (flashcards.length === 0) ? '0 / 0' : (index + 1) + ' / ' + flashcards.length;
+        }
+
+        function flipCard() {
+            if (flashcards.length === 0) return;
+            showingFront = !showingFront;
+            card.classList.toggle('flipped', !showingFront);
+        }
+
+        function nextCard() {
+            if (flashcards.length === 0) return;
+            index = (index + 1) % flashcards.length;
+            showingFront = true;
+            card.classList.remove('flipped');
+            cardScene.classList.remove('slide-left','slide-right');
+            cardScene.classList.add('slide-left');
+            showCard(true);
+            setTimeout(()=>cardScene.classList.remove('slide-left'), 360);
+        }
+
+        function prevCard() {
+            if (flashcards.length === 0) return;
+            index = (index - 1 + flashcards.length) % flashcards.length;
+            showingFront = true;
+            card.classList.remove('flipped');
+            cardScene.classList.remove('slide-left','slide-right');
+            cardScene.classList.add('slide-right');
+            showCard(true);
+            setTimeout(()=>cardScene.classList.remove('slide-right'), 360);
+        }
+
+        // keyboard: Space flips, Arrow keys navigate
+        document.addEventListener('keydown', function (e) {
+            const tag = document.activeElement && document.activeElement.tagName;
+            if (tag === 'INPUT' || tag === 'TEXTAREA' || tag === 'SELECT' || (document.activeElement && document.activeElement.isContentEditable)) return;
+
+            if (e.code === 'Space') {
+                e.preventDefault();
+                flipCard();
+            } else if (e.code === 'ArrowRight') {
+                nextCard();
+            } else if (e.code === 'ArrowLeft') {
+                prevCard();
+            }
+        });
+
+        // start
+        showCard(true);
+    </script>
+
+</body>
+</html>
